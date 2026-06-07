@@ -138,7 +138,7 @@ A naive "always Real" classifier gets 95.1% accuracy — but catches zero fraud.
 
 Real jobs have longer, more detailed descriptions on average (mean: 287 words, max: 1,531 words). Short descriptions under 50 words are a weak but real signal of fraud. After cleaning, average text length drops significantly as stopwords, punctuation, and noise are removed.
 
-![Text Length Reduction](assets/text_length_comparison.png)
+![Text Length Reduction](assets/text_length_reduction.png)
 
 ---
 
@@ -150,15 +150,7 @@ Fake and real job postings share overlapping vocabulary: `work`, `team`, `experi
 
 ---
 
-### 4. Top Industries Targeted by Fake Jobs
-
-Oil & Energy, Marketing, Information Technology, Retail, and Financial Services appear most frequently in fraudulent postings.
-
-![Top Industries](assets/top_industries.png)
-
----
-
-### 5. Feature Analysis — Salary Mention & Remote/Urgent Language
+### 4. Feature Analysis — Salary Mention & Remote/Urgent Language
 
 Fake jobs more often use urgency words and vague remote-work promises without mentioning salary specifics. These patterns were confirmed in EDA and directly shaped the 11 engineered features.
 
@@ -231,13 +223,13 @@ All three models were trained on SMOTE-balanced data and evaluated on the origin
 | Random Forest | 0.9832 | 0.9829 | 0.6647 | 0.7931 | 0.9900 |
 | **XGBoost ✅** | **0.9762** | **0.7178** | **0.8382** | **0.7733** | **0.9864** |
 
-### 6. Model Comparison
+### 5. Model Comparison
 
 ![Model Comparison](assets/model_comparison.png)
 
 ---
 
-### 7. ROC Curves — All Three Models
+### 6. ROC Curves — All Three Models
 
 All three models achieve ROC-AUC above 0.984, confirming strong discrimination ability across different thresholds.
 
@@ -258,7 +250,7 @@ All three models achieve ROC-AUC above 0.984, confirming strong discrimination a
 weighted avg       0.98      0.98      0.98      3576
 ```
 
-### 8. XGBoost Confusion Matrix
+### 7. XGBoost Confusion Matrix
 
 ![Confusion Matrix](assets/confusion_matrix.png)
 
@@ -338,9 +330,8 @@ SafeApply-Fake-Job-Detection/
 │
 ├── 📊 assets/
 │   ├── class_distribution.png       ← Class imbalance bar chart
-│   ├── text_length_comparison.png   ← Text length before vs after cleaning
+│   ├── text_length_reduction.png   ← Text length before vs after cleaning
 │   ├── wordclouds.png               ← Word clouds for fake vs real jobs
-│   ├── top_industries.png           ← Industries most targeted by fraud
 │   ├── feature_analysis.png         ← Salary/urgency/remote feature analysis
 │   ├── model_comparison.png         ← Side-by-side model metrics bar chart
 │   ├── roc_curves.png               ← ROC curves for all 3 models
