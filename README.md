@@ -8,7 +8,7 @@
 
 An end-to-end NLP + Machine Learning pipeline that detects fraudulent job postings — protecting job seekers before they apply.
 
-🚀 **[Live Demo](https://safeapply-fake-job-detection-iza7gg5ywduscya7ulsw8g.streamlit.app/)** &nbsp;·&nbsp; 📓 **[Open in Colab](https://colab.research.google.com/github/priyapoonia0213-art/SafeApply-Fake-Job-Detection/blob/main/fake_job_detection.ipynb)** &nbsp;·&nbsp; 📊 **[Dataset](https://www.kaggle.com/datasets/shivamb/real-or-fake-fake-jobposting-prediction)**
+🚀 **[Live Demo](https://safeapply-fake-job-detection-iza7gg5ywduscya7ulsw8g.streamlit.app/)** &nbsp;·&nbsp; 📓 **[Open in Colab](https://colab.research.google.com/github/priyapoonia0213-art/SafeApply-Fake-Job-Detection/blob/main/ake_Job_detection.ipynb)** &nbsp;·&nbsp; 📊 **[Dataset](https://www.kaggle.com/datasets/shivamb/real-or-fake-fake-jobposting-prediction)**
 
 ---
 
@@ -337,18 +337,20 @@ SafeApply-Fake-Job-Detection/
 │   └── model_info.json              ← Model performance summary
 │
 ├── 📊 assets/
-│   ├── class_distribution.png
-│   ├── wordclouds.png
-│   ├── top_industries.png
-│   ├── feature_analysis.png
-│   ├── text_length_comparison.png
-│   ├── model_comparison.png
-│   ├── roc_curves.png
-│   └── confusion_matrix.png
+│   ├── class_distribution.png       ← Class imbalance bar chart
+│   ├── text_length_comparison.png   ← Text length before vs after cleaning
+│   ├── wordclouds.png               ← Word clouds for fake vs real jobs
+│   ├── top_industries.png           ← Industries most targeted by fraud
+│   ├── feature_analysis.png         ← Salary/urgency/remote feature analysis
+│   ├── model_comparison.png         ← Side-by-side model metrics bar chart
+│   ├── roc_curves.png               ← ROC curves for all 3 models
+│   └── confusion_matrix.png         ← XGBoost confusion matrix
 │
 ├── requirements.txt
 └── README.md
 ```
+
+> ⚠️ **Note:** If your actual asset filenames differ from the ones listed above, update the `![…](assets/filename.png)` references in this README to match exactly — GitHub image embeds are case-sensitive.
 
 ---
 
@@ -396,47 +398,32 @@ streamlit run app.py
 
 ## 💡 Key Learnings
 
-- **Accuracy is misleading on imbalanced data** — 95% accuracy can mean zero fraud caught. F1-Score and Recall are the only metrics that matter here.
-- **SMOTE on training data only** — applying it to test data causes data leakage and gives inflated, dishonest results.
+- **Accuracy is misleading on imbalanced data** — F1-Score and Recall are the only metrics that matter here; 95% accuracy can mean zero fraud caught.
+- **SMOTE on training data only** — applying it to the test set causes data leakage and inflates results dishonestly.
 - **TF-IDF must be fit on training data only** — fitting on the full dataset leaks test information into the model.
-- **Trigrams add real signal** — phrases like "no experience required", "urgent requirement", and "work from anywhere" carry far more meaning than individual words.
-- **Random Forest's high precision is a trap** — it flags almost no false alarms, but misses 33% of actual frauds, which is the worst possible outcome for this use case.
-- **Threshold tuning changes everything** — XGBoost at threshold 0.4 yields F1 of 0.8268 vs 0.7733 at default 0.5. The default threshold is almost never optimal for imbalanced problems.
-- **scale_pos_weight = 19.6** — passing the class ratio directly to XGBoost gives it native awareness of imbalance, complementing SMOTE.
+- **Trigrams add real signal** — phrases like "no experience required" carry far more meaning than individual words.
+- **Random Forest's high precision is a trap** — it misses 33% of actual frauds, which is the worst possible outcome here.
+- **Threshold tuning changes everything** — XGBoost at threshold 0.4 yields F1 of 0.8268 vs 0.7733 at default 0.5.
+- **scale_pos_weight = 19.6** — passing the class ratio to XGBoost gives it native imbalance awareness, complementing SMOTE.
 
 ---
 
 ## 🚀 Future Improvements
 
-The current model performs well with classical ML, but several directions could push it significantly further:
-
-**Explainability**
-Adding SHAP (SHapley Additive exPlanations) values would let users see exactly which words and features drove a specific prediction — making the model transparent and trustworthy rather than a black box.
-
-**Richer Text Representations**
-TF-IDF captures word frequency but misses meaning and context. Replacing or augmenting it with **BERT embeddings** (e.g. `bert-base-uncased` or a domain-fine-tuned variant) would let the model understand phrases like "competitive salary" vs "unrealistic salary" semantically — something n-grams simply cannot do.
-
-**Better Hyperparameter Optimization**
-The current tuning uses RandomizedSearchCV with a limited grid. **Optuna** (Bayesian optimization) explores the hyperparameter space far more efficiently and consistently finds better configurations with fewer trials.
-
-**Experiment Tracking**
-Right now, results are logged manually. Integrating **MLflow** would track every experiment — parameters, metrics, artifacts — making it easy to reproduce any result and compare runs systematically.
-
-**India-Specific Training Data**
-The EMSCAD dataset is predominantly Western English job postings. Training on Indian job portal data (Naukri, LinkedIn India, Internshala) would make the model far more effective at catching scams that specifically target Indian job seekers — including regional language patterns and India-specific fraud tactics like "registration fees" framed as "refundable deposits."
-
-**Additional Structured Features**
-`employment_type`, `industry`, and `required_experience` were not label-encoded and used as features in the current version. Including them as categorical inputs could add meaningful signal, particularly for industry-specific fraud patterns.
-
-**Confidence Threshold Tuning via ROC Analysis**
-A systematic ROC curve analysis on a held-out validation set could identify the optimal decision threshold — rather than testing just 0.3, 0.4, and 0.5 as done currently.
+- **SHAP explainability** — show users exactly which words drove each prediction, making the model transparent.
+- **BERT embeddings** — replace TF-IDF with contextual embeddings to understand semantic meaning, not just frequency.
+- **Optuna hyperparameter tuning** — Bayesian optimization for more efficient and accurate hyperparameter search.
+- **MLflow experiment tracking** — log every run's params, metrics, and artifacts for reproducibility.
+- **India-specific training data** — add Naukri/LinkedIn India/Internshala data to catch region-specific fraud patterns.
+- **Categorical feature encoding** — label-encode `employment_type`, `industry`, and `required_experience` as model inputs.
+- **Systematic threshold optimization** — use full ROC curve analysis on a held-out validation set to find the optimal cutoff.
 
 ---
 
 ## ⚠️ Limitations
 
 - The EMSCAD dataset is primarily English-language Western job postings — Indian-specific or vernacular fraud patterns may be underrepresented.
-- `employment_type`, `industry`, and `required_experience` are not currently used as label-encoded model features — a gap flagged for future work above.
+- `employment_type`, `industry`, and `required_experience` are not currently used as label-encoded model features.
 - No model explainability layer yet — the model gives a probability score but does not tell users *why* a posting was flagged.
 
 ---
