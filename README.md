@@ -8,7 +8,7 @@
 
 An end-to-end NLP + Machine Learning pipeline that detects fraudulent job postings — protecting job seekers before they apply.
 
-🚀 **[Live Demo](#)** &nbsp;·&nbsp; 📓 **[Open in Colab](https://colab.research.google.com/github/priyapoonia0213-art/SafeApply-Fake-Job-Detection/blob/main/Fake_Job_Detection.ipynb)** &nbsp;·&nbsp; 📊 **[Dataset](https://www.kaggle.com/datasets/shivamb/real-or-fake-fake-jobposting-prediction)**
+🚀 **[Live Demo](https://safeapply-fake-job-detection-iza7gg5ywduscya7ulsw8g.streamlit.app/)** &nbsp;·&nbsp; 📓 **[Open in Colab](https://colab.research.google.com/github/priyapoonia0213-art/SafeApply-Fake-Job-Detection/blob/main/Fake_Job_Detection.ipynb)** &nbsp;·&nbsp; 📊 **[Dataset](https://www.kaggle.com/datasets/shivamb/real-or-fake-fake-jobposting-prediction)**
 
 ---
 
@@ -121,7 +121,7 @@ Raw CSV  (fake_job_postings.csv)
 
 ## 📈 Exploratory Data Analysis
 
-**Class Distribution**
+### 1. Class Distribution
 
 | Label | Count | Share |
 |---|---|---|
@@ -134,15 +134,23 @@ A naive "always Real" classifier gets 95.1% accuracy — but catches zero fraud.
 
 ---
 
-**Word Clouds — Fake vs Real Jobs**
+### 2. Text Length: Before vs After Cleaning
 
-Fake and real job postings share overlapping vocabulary: `work`, `team`, `experience`, `company`. Simple keyword matching won't work here — scammers deliberately copy real job language. ML finds the hidden statistical differences.
+Real jobs have longer, more detailed descriptions on average (mean: 287 words, max: 1,531 words). Short descriptions under 50 words are a weak but real signal of fraud. After cleaning, average text length drops significantly as stopwords, punctuation, and noise are removed.
+
+![Text Length Reduction](assets/text_length_comparison.png)
+
+---
+
+### 3. Word Clouds — Fake vs Real Jobs
+
+Fake and real job postings share overlapping vocabulary: `work`, `team`, `experience`, `company`. Simple keyword matching won't work — scammers deliberately copy real job language. ML finds the hidden statistical differences that the human eye misses.
 
 ![Word Clouds](assets/wordclouds.png)
 
 ---
 
-**Top Industries Targeted by Fake Jobs**
+### 4. Top Industries Targeted by Fake Jobs
 
 Oil & Energy, Marketing, Information Technology, Retail, and Financial Services appear most frequently in fraudulent postings.
 
@@ -150,19 +158,11 @@ Oil & Energy, Marketing, Information Technology, Retail, and Financial Services 
 
 ---
 
-**Feature Analysis — Salary Mention & Remote/Urgent Language**
+### 5. Feature Analysis — Salary Mention & Remote/Urgent Language
 
-Fake jobs more often use urgency words and vague remote-work promises without mentioning salary specifics. These patterns were confirmed in EDA and directly shaped the engineered features.
+Fake jobs more often use urgency words and vague remote-work promises without mentioning salary specifics. These patterns were confirmed in EDA and directly shaped the 11 engineered features.
 
 ![Feature Analysis](assets/feature_analysis.png)
-
----
-
-**Text Length: Before vs After Cleaning**
-
-Real jobs have longer, more detailed descriptions on average (mean: 287 words, max: 1,531 words). Short descriptions under 50 words are a weak but real signal of fraud.
-
-![Text Length](assets/text_length_comparison.png)
 
 ---
 
@@ -231,11 +231,13 @@ All three models were trained on SMOTE-balanced data and evaluated on the origin
 | Random Forest | 0.9832 | 0.9829 | 0.6647 | 0.7931 | 0.9900 |
 | **XGBoost ✅** | **0.9762** | **0.7178** | **0.8382** | **0.7733** | **0.9864** |
 
+### 6. Model Comparison
+
 ![Model Comparison](assets/model_comparison.png)
 
 ---
 
-**ROC Curves — All Three Models**
+### 7. ROC Curves — All Three Models
 
 All three models achieve ROC-AUC above 0.984, confirming strong discrimination ability across different thresholds.
 
@@ -256,7 +258,7 @@ All three models achieve ROC-AUC above 0.984, confirming strong discrimination a
 weighted avg       0.98      0.98      0.98      3576
 ```
 
-**XGBoost Confusion Matrix:**
+### 8. XGBoost Confusion Matrix
 
 ![Confusion Matrix](assets/confusion_matrix.png)
 
