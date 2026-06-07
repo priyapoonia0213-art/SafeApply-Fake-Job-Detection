@@ -4,8 +4,11 @@
 ![Scikit-Learn](https://img.shields.io/badge/Scikit--Learn-ML-orange?style=flat-square)
 ![XGBoost](https://img.shields.io/badge/XGBoost-Best%20Model-green?style=flat-square)
 ![Streamlit](https://img.shields.io/badge/Streamlit-Web%20App-red?style=flat-square)
+![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)
 
 An end-to-end NLP + Machine Learning pipeline that detects fraudulent job postings — protecting job seekers before they apply.
+
+🚀 **[Live Demo](#)** &nbsp;·&nbsp; 📓 **[Open in Colab](https://colab.research.google.com/github/priyapoonia0213-art/SafeApply-Fake-Job-Detection/blob/main/Fake_Job_Detection.ipynb)** &nbsp;·&nbsp; 📊 **[Dataset](https://www.kaggle.com/datasets/shivamb/real-or-fake-fake-jobposting-prediction)**
 
 ---
 
@@ -19,16 +22,21 @@ An end-to-end NLP + Machine Learning pipeline that detects fraudulent job postin
 - [Handling Class Imbalance](#-handling-class-imbalance--smote)
 - [Models and Results](#-models-and-results)
 - [Why XGBoost?](#-why-xgboost)
+- [Model Test Results](#-model-test-results)
 - [Streamlit Web App](#-streamlit-web-app)
 - [Project Structure](#-project-structure)
 - [How to Run](#-how-to-run)
 - [Tech Stack](#-tech-stack)
+- [Key Learnings](#-key-learnings)
+- [Future Improvements](#-future-improvements)
+- [Limitations](#-limitations)
+- [Authors](#-authors)
 
 ---
 
 ## 🎯 Problem Statement
 
-Fake job postings deceive thousands of job seekers daily — stealing personal information, charging illegal upfront fees, and wasting precious time. SafeApply uses machine learning to flag suspicious listings automatically, before a job seeker applies.
+Fake job postings deceive thousands of job seekers daily — stealing personal information, charging illegal upfront fees, and wasting precious time. SafeApply uses machine learning to automatically flag suspicious listings before a job seeker ever applies.
 
 ---
 
@@ -44,11 +52,11 @@ Fake job postings deceive thousands of job seekers daily — stealing personal i
 | Target Column | `fraudulent` (0 = Real, 1 = Fake) |
 | Text Columns Used | `title`, `company_profile`, `description`, `requirements`, `benefits` |
 
-The dataset has significant class imbalance — only 4.9% of postings are fake. This means a naive model that always predicts "Real" would get 95% accuracy while catching zero fraud. This is exactly why we use **F1-Score and Recall** as our primary metrics, and apply **SMOTE** to balance training data.
+The dataset has significant class imbalance — only 4.9% of postings are fake. A naive model that always predicts "Real" scores 95% accuracy while catching zero fraud. This is exactly why **F1-Score and Recall** are the primary metrics, and **SMOTE** is applied to balance training data.
 
 **Missing values (before cleaning):**
 
-| Column | Missing |
+| Column | Missing Count |
 |---|---|
 | salary_range | 15,012 |
 | department | 11,547 |
@@ -57,7 +65,7 @@ The dataset has significant class imbalance — only 4.9% of postings are fake. 
 | company_profile | 3,308 |
 | requirements | 2,696 |
 
-Columns `salary_range`, `department`, and `job_id` were dropped. All remaining text columns were filled with empty strings.
+Columns `salary_range`, `department`, and `job_id` were dropped entirely. All remaining text columns had nulls filled with empty strings.
 
 ---
 
@@ -83,11 +91,12 @@ Raw CSV  (fake_job_postings.csv)
      │
      ▼
 5.  Clean Text — lowercase → email_token / number_token substitution
-                 → remove special chars → stopword removal → lemmatization
+                 → remove special characters → stopword removal → lemmatization
      │
      ▼
-6.  Feature Engineering — 11 extra numerical features + TF-IDF (20,000 features,
+6.  Feature Engineering — 11 numerical features + TF-IDF (20,000 features,
                           n-grams 1–3, sublinear_tf=True) → scipy hstack
+                          → 20,011 total features
      │
      ▼
 7.  Train-Test Split — 80/20, stratify=y (preserves 4.9% fake ratio)
@@ -96,16 +105,16 @@ Raw CSV  (fake_job_postings.csv)
 8.  SMOTE — training set only: 693 fake → 13,611 fake (balanced 50/50)
      │
      ▼
-9.  Train 3 Models — Logistic Regression · Random Forest · XGBoost
+9.  Train 3 Models — Logistic Regression · Random Forest · XGBoost (with RandomizedSearchCV)
      │
      ▼
-10. Evaluate + Select — XGBoost chosen (best F1 + Recall balance)
+10. Evaluate + Select — XGBoost chosen: best F1 + Recall balance
      │
      ▼
 11. Save — best_model.pkl · tfidf_vectorizer.pkl · model_info.json
      │
      ▼
-12. Streamlit App — paste job posting → instant prediction + fraud flags
+12. Streamlit App — paste job posting → instant prediction + fraud probability + warning flags
 ```
 
 ---
@@ -119,22 +128,41 @@ Raw CSV  (fake_job_postings.csv)
 | Real (0) | 17,014 | 95.1% |
 | Fake (1) | 866 | 4.9% |
 
-A naive "always Real" classifier scores 95.1% accuracy — but catches zero fraud. This confirms why accuracy alone is a misleading metric for this task.
+A naive "always Real" classifier gets 95.1% accuracy — but catches zero fraud. This is why accuracy alone cannot be trusted for this task.
 
-**Text Length Statistics (after cleaning)**
+![Class Distribution](assets/class_distribution.png)
 
-| Stat | Value |
-|---|---|
-| Mean text length | 2,205 characters |
-| Mean word count | 287 words |
-| Min word count | 2 words |
-| Max word count | 1,531 words |
+---
 
-Real jobs tend to be longer and more detailed — confirmed by the word count feature analysis.
+**Word Clouds — Fake vs Real Jobs**
 
-**Top Industries Targeted by Fake Jobs** — Oil & Energy, Marketing, IT, Retail, and Financial Services appear most frequently in fraudulent postings.
+Fake and real job postings share overlapping vocabulary: `work`, `team`, `experience`, `company`. Simple keyword matching won't work here — scammers deliberately copy real job language. ML finds the hidden statistical differences.
 
-**Word Cloud Observation** — Fake and real jobs use overlapping vocabulary (`work`, `team`, `experience`, `company`). Simple keyword filters cannot distinguish them; statistical ML patterns are necessary.
+![Word Clouds](assets/wordclouds.png)
+
+---
+
+**Top Industries Targeted by Fake Jobs**
+
+Oil & Energy, Marketing, Information Technology, Retail, and Financial Services appear most frequently in fraudulent postings.
+
+![Top Industries](assets/top_industries.png)
+
+---
+
+**Feature Analysis — Salary Mention & Remote/Urgent Language**
+
+Fake jobs more often use urgency words and vague remote-work promises without mentioning salary specifics. These patterns were confirmed in EDA and directly shaped the engineered features.
+
+![Feature Analysis](assets/feature_analysis.png)
+
+---
+
+**Text Length: Before vs After Cleaning**
+
+Real jobs have longer, more detailed descriptions on average (mean: 287 words, max: 1,531 words). Short descriptions under 50 words are a weak but real signal of fraud.
+
+![Text Length](assets/text_length_comparison.png)
 
 ---
 
@@ -146,14 +174,14 @@ Real jobs tend to be longer and more detailed — confirmed by the word count fe
 |---|---|---|
 | max_features | 20,000 | Top 20,000 most informative tokens |
 | ngram_range | (1, 3) | Unigrams + bigrams + trigrams |
-| min_df | 2 | Remove extremely rare tokens |
-| max_df | 0.95 | Remove near-universal tokens |
-| sublinear_tf | True | Log scaling to reduce very frequent words |
-| Fit on | Training data only | Prevents data leakage |
+| min_df | 2 | Removes extremely rare tokens |
+| max_df | 0.95 | Removes near-universal tokens |
+| sublinear_tf | True | Log scaling reduces very frequent words |
+| Fit on | Training data only | Prevents data leakage into test set |
 
-**11 Engineered Numerical Features** (combined with TF-IDF via `scipy.sparse.hstack`):
+**11 Engineered Numerical Features** (stacked with TF-IDF via `scipy.sparse.hstack`):
 
-| Feature | Type | Signal |
+| Feature | Type | What It Captures |
 |---|---|---|
 | `text_length` | Integer | Fake jobs tend to be shorter and vaguer |
 | `word_count` | Integer | Real jobs use more detailed language |
@@ -161,9 +189,9 @@ Real jobs tend to be longer and more detailed — confirmed by the word count fe
 | `telecommuting` | Binary | Remote-only claims are a mild signal |
 | `has_questions` | Binary | Legitimate jobs usually include screening questions |
 | `has_salary` | Binary | Presence of salary/pay/compensation keywords |
-| `has_urgent` | Binary | Urgent/immediately/hurry language |
+| `has_urgent` | Binary | Urgent/immediately/hurry language patterns |
 | `has_remote` | Binary | Remote/work-from-home claims |
-| `has_email` | Binary | Personal email address present |
+| `has_email` | Binary | Personal email address (e.g. gmail) present |
 | `is_short_desc` | Binary | Word count < 50 |
 | `is_long_desc` | Binary | Word count > 500 |
 
@@ -173,7 +201,7 @@ Real jobs tend to be longer and more detailed — confirmed by the word count fe
 
 ## ⚖️ Handling Class Imbalance — SMOTE
 
-SMOTE (Synthetic Minority Over-sampling Technique) creates synthetic fake job examples in the training set only.
+SMOTE (Synthetic Minority Over-sampling Technique) generates synthetic fake job examples so the model sees enough fraud patterns during training.
 
 ```
 Before SMOTE (training set):
@@ -182,20 +210,20 @@ Before SMOTE (training set):
 
 After SMOTE (training set):
   Real jobs :  13,611  (50%)
-  Fake jobs :  13,611  (50%)    ← model learns fake patterns properly
+  Fake jobs :  13,611  (50%)    ← model learns fraud patterns properly
 
-Test set (never touched):
-  Real jobs :   3,403  (95.2%)  ← real-world distribution for honest evaluation
+Test set (never touched by SMOTE):
+  Real jobs :   3,403  (95.2%)  ← real-world distribution, honest evaluation
   Fake jobs :     173   (4.8%)
 ```
 
-SMOTE is applied **only on training data**. Applying it on test data would be data leakage.
+SMOTE is applied **only on training data**. Applying it to test data is data leakage and would produce artificially inflated results.
 
 ---
 
 ## 🤖 Models and Results
 
-All three models trained on SMOTE-balanced data, evaluated on the original untouched test set:
+All three models were trained on SMOTE-balanced data and evaluated on the original, untouched test set:
 
 | Model | Accuracy | Precision | Recall | F1 Score | ROC-AUC |
 |---|---|---|---|---|---|
@@ -203,7 +231,19 @@ All three models trained on SMOTE-balanced data, evaluated on the original untou
 | Random Forest | 0.9832 | 0.9829 | 0.6647 | 0.7931 | 0.9900 |
 | **XGBoost ✅** | **0.9762** | **0.7178** | **0.8382** | **0.7733** | **0.9864** |
 
-**XGBoost Final Classification Report (test set, threshold = 0.5):**
+![Model Comparison](assets/model_comparison.png)
+
+---
+
+**ROC Curves — All Three Models**
+
+All three models achieve ROC-AUC above 0.984, confirming strong discrimination ability across different thresholds.
+
+![ROC Curves](assets/roc_curves.png)
+
+---
+
+**XGBoost — Final Classification Report (test set):**
 
 ```
               precision    recall  f1-score   support
@@ -216,10 +256,15 @@ All three models trained on SMOTE-balanced data, evaluated on the original untou
 weighted avg       0.98      0.98      0.98      3576
 ```
 
-**XGBoost Hyperparameters (found via RandomizedSearchCV, 3-fold CV):**
+**XGBoost Confusion Matrix:**
+
+![Confusion Matrix](assets/confusion_matrix.png)
+
+**XGBoost Hyperparameters** (tuned via RandomizedSearchCV, 3-fold CV):
 
 ```python
 Best CV F1: 0.7809
+
 Best params: {
     'n_estimators':     200,
     'max_depth':        8,
@@ -245,11 +290,11 @@ Best params: {
 
 | Model | Strength | Weakness | Verdict |
 |---|---|---|---|
-| Logistic Regression | Highest Recall (0.8844) | Precision only 0.55 — too many false alarms | ❌ Flags too many real jobs |
-| Random Forest | Highest Precision (0.9829) | Recall only 0.6647 — misses 1 in 3 fake jobs | ❌ Lets too many frauds through |
-| XGBoost | Best F1 (0.7733) · Recall 0.8382 | Middle precision | ✅ Best practical balance |
+| Logistic Regression | Highest Recall (0.8844) | Precision only 0.55 — too many false alarms on real jobs | ❌ Not deployment-ready |
+| Random Forest | Highest Precision (0.9829) | Recall only 0.6647 — misses 1 in 3 fake jobs | ❌ Too many frauds slip through |
+| XGBoost | Best F1 (0.7733) with strong Recall (0.8382) | Middle precision | ✅ Best overall balance |
 
-For fraud detection, **Recall matters more than Precision**. Missing a fake job is more harmful than occasionally flagging a real one. XGBoost catches 83.8% of all fake jobs while keeping false alarms manageable.
+For fraud detection, **Recall matters more than Precision**. Missing a fake job harms the job seeker more than a false alarm ever would. XGBoost catches 83.8% of all fake jobs while keeping false alarms reasonable.
 
 ---
 
@@ -266,11 +311,11 @@ For fraud detection, **Recall matters more than Precision**. Missing a fake job 
 
 A 4-page interactive app built with Streamlit:
 
-| Page | Description |
+| Page | What It Does |
 |---|---|
-| 🏠 Home | Common red flags, project overview |
+| 🏠 Home | Common red flags explained, project overview |
 | 🔎 Detect Fake Job | Paste any job posting → instant prediction + fraud probability gauge + feature flags |
-| 📊 Model Performance | Full comparison of all 3 models — metrics table, bar charts |
+| 📊 Model Performance | Full comparison of all 3 models — metrics table and bar charts |
 | ℹ️ About Project | Full ML pipeline walkthrough, dataset info, tech stack |
 
 ---
@@ -280,11 +325,9 @@ A 4-page interactive app built with Streamlit:
 ```
 SafeApply-Fake-Job-Detection/
 │
-├── 📓 notebooks/
-│   └── FinalFile.ipynb              ← Full Google Colab training notebook
+├── 📓 Fake_Job_Detection.ipynb      ← Full Google Colab training notebook
 │
-├── 🌐 app/
-│   └── app.py                       ← Streamlit web app
+├── 🌐 app.py                        ← Streamlit web app (lives at root level)
 │
 ├── 🤖 models/
 │   ├── best_model.pkl               ← Saved XGBoost model
@@ -292,7 +335,14 @@ SafeApply-Fake-Job-Detection/
 │   └── model_info.json              ← Model performance summary
 │
 ├── 📊 assets/
-│   └── *.png                        ← EDA charts, confusion matrix, ROC curves
+│   ├── class_distribution.png
+│   ├── wordclouds.png
+│   ├── top_industries.png
+│   ├── feature_analysis.png
+│   ├── text_length_comparison.png
+│   ├── model_comparison.png
+│   ├── roc_curves.png
+│   └── confusion_matrix.png
 │
 ├── requirements.txt
 └── README.md
@@ -302,34 +352,39 @@ SafeApply-Fake-Job-Detection/
 
 ## ▶️ How to Run
 
-**Clone and install:**
+**Option 1 — Run Locally**
 
 ```bash
-git clone https://github.com/saloni-78/SafeApply-Fake-Job-Detection.git
+# 1. Clone the repository
+git clone https://github.com/priyapoonia0213-art/SafeApply-Fake-Job-Detection.git
 cd SafeApply-Fake-Job-Detection
+
+# 2. Install dependencies
 pip install -r requirements.txt
-streamlit run app/app.py
+
+# 3. Run the app
+streamlit run app.py
 ```
 
-**Train from scratch (Google Colab):**
+**Option 2 — Train from Scratch (Google Colab)**
 
-1. Open `notebooks/FinalFile.ipynb` in Google Colab
-2. Download `fake_job_postings.csv` from Kaggle and upload to your Drive
-3. Run all cells — model files are saved to `models/`
-4. Download `best_model.pkl`, `tfidf_vectorizer.pkl`, `model_info.json` → place in `models/`
+1. Open **[Fake_Job_Detection.ipynb](https://colab.research.google.com/github/priyapoonia0213-art/SafeApply-Fake-Job-Detection/blob/main/Fake_Job_Detection.ipynb)** in Google Colab
+2. Download `fake_job_postings.csv` from **[Kaggle](https://www.kaggle.com/datasets/shivamb/real-or-fake-fake-jobposting-prediction)**
+3. Run all cells — model files are automatically saved to `models/`
+4. Download `best_model.pkl`, `tfidf_vectorizer.pkl`, `model_info.json` and place them in the `models/` folder
 
 ---
 
 ## 🛠️ Tech Stack
 
-| Category | Library |
+| Category | Library / Tool |
 |---|---|
 | Data | pandas, numpy |
-| NLP | TfidfVectorizer (scikit-learn), NLTK (lemmatization, stopwords) |
+| NLP | TfidfVectorizer (scikit-learn), NLTK — lemmatization & stopwords |
 | ML | scikit-learn (Logistic Regression, Random Forest), XGBoost |
-| Imbalance | imbalanced-learn (SMOTE) |
+| Imbalance Handling | imbalanced-learn (SMOTE) |
 | Sparse Matrix | scipy (hstack) |
-| Hyperparameter Tuning | RandomizedSearchCV (3-fold stratified CV) |
+| Hyperparameter Tuning | RandomizedSearchCV — 3-fold stratified CV |
 | Visualization | matplotlib, seaborn, wordcloud |
 | Web App | Streamlit |
 | Model Saving | joblib |
@@ -339,21 +394,48 @@ streamlit run app/app.py
 
 ## 💡 Key Learnings
 
-- **Accuracy is misleading on imbalanced data** — 95% accuracy can mean zero fraud caught. Always use F1-Score and Recall for fraud detection.
-- **SMOTE on training data only** — applying it to test data causes data leakage and inflated metrics.
-- **TF-IDF fit on training data only** — same reason: prevents test set contamination.
-- **Bigrams carry more signal** than unigrams alone — "no experience" and "urgent hiring" are far more informative than their individual words.
-- **Random Forest had the highest precision but lowest recall** — the worst possible trade-off for fraud detection, where missing a scam is more costly than a false alarm.
-- **Threshold tuning matters** — XGBoost at threshold 0.4 gives better F1 (0.8268) than the default 0.5.
-- **scale_pos_weight = 19.6** — the class ratio from the original training data, passed to XGBoost so it natively handles imbalance even before SMOTE.
+- **Accuracy is misleading on imbalanced data** — 95% accuracy can mean zero fraud caught. F1-Score and Recall are the only metrics that matter here.
+- **SMOTE on training data only** — applying it to test data causes data leakage and gives inflated, dishonest results.
+- **TF-IDF must be fit on training data only** — fitting on the full dataset leaks test information into the model.
+- **Trigrams add real signal** — phrases like "no experience required", "urgent requirement", and "work from anywhere" carry far more meaning than individual words.
+- **Random Forest's high precision is a trap** — it flags almost no false alarms, but misses 33% of actual frauds, which is the worst possible outcome for this use case.
+- **Threshold tuning changes everything** — XGBoost at threshold 0.4 yields F1 of 0.8268 vs 0.7733 at default 0.5. The default threshold is almost never optimal for imbalanced problems.
+- **scale_pos_weight = 19.6** — passing the class ratio directly to XGBoost gives it native awareness of imbalance, complementing SMOTE.
+
+---
+
+## 🚀 Future Improvements
+
+The current model performs well with classical ML, but several directions could push it significantly further:
+
+**Explainability**
+Adding SHAP (SHapley Additive exPlanations) values would let users see exactly which words and features drove a specific prediction — making the model transparent and trustworthy rather than a black box.
+
+**Richer Text Representations**
+TF-IDF captures word frequency but misses meaning and context. Replacing or augmenting it with **BERT embeddings** (e.g. `bert-base-uncased` or a domain-fine-tuned variant) would let the model understand phrases like "competitive salary" vs "unrealistic salary" semantically — something n-grams simply cannot do.
+
+**Better Hyperparameter Optimization**
+The current tuning uses RandomizedSearchCV with a limited grid. **Optuna** (Bayesian optimization) explores the hyperparameter space far more efficiently and consistently finds better configurations with fewer trials.
+
+**Experiment Tracking**
+Right now, results are logged manually. Integrating **MLflow** would track every experiment — parameters, metrics, artifacts — making it easy to reproduce any result and compare runs systematically.
+
+**India-Specific Training Data**
+The EMSCAD dataset is predominantly Western English job postings. Training on Indian job portal data (Naukri, LinkedIn India, Internshala) would make the model far more effective at catching scams that specifically target Indian job seekers — including regional language patterns and India-specific fraud tactics like "registration fees" framed as "refundable deposits."
+
+**Additional Structured Features**
+`employment_type`, `industry`, and `required_experience` were not label-encoded and used as features in the current version. Including them as categorical inputs could add meaningful signal, particularly for industry-specific fraud patterns.
+
+**Confidence Threshold Tuning via ROC Analysis**
+A systematic ROC curve analysis on a held-out validation set could identify the optimal decision threshold — rather than testing just 0.3, 0.4, and 0.5 as done currently.
 
 ---
 
 ## ⚠️ Limitations
 
-- Dataset is primarily English-language Western job postings — regional or vernacular scam patterns may not be well represented.
-- The model does not use `employment_type`, `industry`, or `required_experience` as label-encoded features — these could add signal in a future version.
-- No SHAP explainability currently — a future addition to show which words drove each individual prediction.
+- The EMSCAD dataset is primarily English-language Western job postings — Indian-specific or vernacular fraud patterns may be underrepresented.
+- `employment_type`, `industry`, and `required_experience` are not currently used as label-encoded model features — a gap flagged for future work above.
+- No model explainability layer yet — the model gives a probability score but does not tell users *why* a posting was flagged.
 
 ---
 
