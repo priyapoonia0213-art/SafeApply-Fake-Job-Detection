@@ -8,7 +8,7 @@
 
 An end-to-end NLP + Machine Learning pipeline that detects fraudulent job postings — protecting job seekers before they apply.
 
-🚀 **[Live Demo](https://safeapply-fake-job-detection-iza7gg5ywduscya7ulsw8g.streamlit.app/)** &nbsp;·&nbsp; 📓 **[Open in Colab](https://colab.research.google.com/github/priyapoonia0213-art/SafeApply-Fake-Job-Detection/blob/main/Fake_Job_Detection.ipynb)** &nbsp;·&nbsp; 📊 **[Dataset](https://www.kaggle.com/datasets/shivamb/real-or-fake-fake-jobposting-prediction)**
+🚀 **[Live Demo](https://safeapply-fake-job-detection-iza7gg5ywduscya7ulsw8g.streamlit.app/)** &nbsp;·&nbsp; 📓 **[Open in Colab](https://colab.research.google.com/github/priyapoonia0213-art/SafeApply-Fake-Job-Detection/blob/main/fake_job_detection.ipynb)** &nbsp;·&nbsp; 📊 **[Dataset](https://www.kaggle.com/datasets/shivamb/real-or-fake-fake-jobposting-prediction)**
 
 ---
 
