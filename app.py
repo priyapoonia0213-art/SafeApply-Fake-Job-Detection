@@ -606,16 +606,20 @@ Apply at: careers.abctech.com"""
         if not job_text.strip():
             st.warning("Please paste a job posting first.")
         else:
-            # ── Loading state ────────────────────────────────────────────────
-            with st.spinner(""):
+            result_placeholder = st.empty()
+
+            with result_placeholder:
                 st.markdown("""
-                <div style="text-align:center;padding:20px 0 10px 0;animation:fadeSlideUp 0.4s ease both">
+                <div style="text-align:center;padding:40px 0 20px 0;animation:fadeSlideUp 0.4s ease both">
                     <div class="loading-spinner"></div>
-                    <div style="color:#7A5C3E;font-size:0.95rem;font-weight:600">Analysing job posting…</div>
+                    <div style="color:#7A5C3E;font-size:0.95rem;font-weight:600;margin-top:8px">Analysing job posting…</div>
                     <div style="color:#A08060;font-size:0.83rem;margin-top:4px">Running NLP pipeline & XGBoost model</div>
                 </div>
                 """, unsafe_allow_html=True)
-                pred, prob, features = predict(job_text)
+
+            pred, prob, features = predict(job_text)
+
+            result_placeholder.empty()
 
             st.markdown("---")
             st.markdown("### 📋 Analysis Result")
