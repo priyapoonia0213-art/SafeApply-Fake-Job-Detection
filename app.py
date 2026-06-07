@@ -58,6 +58,25 @@ header[data-testid="stHeader"] {
 }
 
 /* ── Sidebar ── */
+ /* ── Sidebar collapse/expand toggle button ── */
+[data-testid="collapsedControl"],
+button[kind="headerNoPadding"],
+.st-emotion-cache-1egp75t,
+[data-testid="stSidebarCollapseButton"] button,
+[data-testid="stSidebarCollapsedControl"] button {
+    color: #3D2B1F !important;
+    background: #C8B89A !important;
+    border-radius: 50% !important;
+}
+
+/* The actual chevron SVG icon inside the button */
+[data-testid="stSidebarCollapseButton"] button svg,
+[data-testid="stSidebarCollapsedControl"] button svg,
+[data-testid="collapsedControl"] svg {
+    fill: #3D2B1F !important;
+    stroke: #3D2B1F !important;
+    color: #3D2B1F !important;
+}
 [data-testid="stSidebar"] {
     background: linear-gradient(160deg, #EAE0CC 0%, #D9CDB8 100%);
     border-right: 2px solid #C8B89A;
